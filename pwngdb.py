@@ -102,6 +102,12 @@ class PwnCmd(object):
                 print("\033[34m" + hex(sym)  + ":" + "\033[37m" +hex(symaddr))
             else :
                 print("\033[34m" + sym  + ":" + "\033[37m" +hex(symaddr))
+    def offf(self,*arg) :
+        """ Calculate the offset of libc """
+        #(sym,)= normalize_argv(arg,1)
+        (sym,) = normalize_argv(arg,1)
+        codebs = codeaddr()[0]
+        print("\033[34m" + hex(sym)  + ":" + "\033[37m" +hex(sym - codebs))
     
     def fp(self,*arg):
         """ show FILE structure """
