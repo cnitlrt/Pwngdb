@@ -186,6 +186,39 @@ class PwnCmd(object):
             print(dyn)
         else :
             print("No current process or executable file specified." )
+    def readelf(self) :
+        """Print the seccons"""
+        processname = getprocname()
+        elfinfo = {}
+        codebs = codeaddr()[0]
+        out = subprocess.check_output("readelf -W -S \"" + processname + "\"",shell = True).decode('utf-8')
+        if not out:
+            return {}
+        p = re.compile(".*\[.*\] (\.[^ ]*) [^0-9]* ([^ ]*) [^ ]* ([^ ]*)(.*)")
+        matches = p.findall(out)
+        if not matches:
+            return {}
+        # print(matches)
+        """[('.interp', '0000000000000318', '00001c', ' 00   A  0   0  1'), ('.note.gn]"""
+        for (hname, start, size, attr) in matches:
+            start,end = int(start,16),int(start,16) + int(size,16)
+            if start == 0:
+                continue
+            if start < codebs:
+                start += codebs
+            if end < codebs:
+                end += codebs
+            if "X" in attr:
+                htype = "code"
+            elif "W" in attr:
+                htype = "data"
+            else:
+                htype = "rodata"
+            elfinfo[hname.strip()] = (start,end,htype)
+        result = {}
+        result = elfinfo
+        for (k, (start, end, type)) in sorted(result.items(), key=lambda x: x[1]):
+                print("%s = 0x%x" % (k, start))
 
     def rop(self):
         """ ROPgadget """
